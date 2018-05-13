@@ -1,0 +1,363 @@
+---
+title: "GitHub and Friends"
+subtitle: ""
+author: '`r jrPresentation::get_author()`'
+output:
+  xaringan::moon_reader:
+    css: ["default", "style.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE, message=FALSE}
+options(htmltools.dir.version = FALSE)
+library("jrPresentation")
+set_presentation_options()
+```
+
+layout: true
+`r add_border(inverse=FALSE)`
+---
+
+# Code
+
+  * Slides: https://jumpingrivers.com/t/2018-erurm/
+
+  * Repo: https://github.com/erum2018-talk/
+  
+    - Contains slides
+    
+    - All the automation I'm about to talk about
+
+---
+
+# We all use packages (don't we?)
+
+--
+
+  * Automatic code checks
+
+--
+
+  * Version numbers
+
+--
+
+  * Enforces documentation
+
+--
+
+    - But it can't force us to write good documentation!
+
+---
+
+# We all use version control (don't we?)
+
+--
+
+We get to avoid
+
+  * thesis.R
+    
+  * thesis1a.R
+    
+  * thesis1a_final.R
+
+--
+
+  * thesis1a_final_I_hate_my_degree.R
+
+--
+
+It (allegedly) makes it easier to merge documents
+
+> Generally "a good thing"
+
+--
+
+This talk uses git and GitHub
+
+---
+
+# Data science workflow
+
+```{r echo=FALSE, out.width="100%"}
+knitr::include_graphics("graphics/pipeline.jpg")
+```
+---
+
+layout: true
+`r add_border(inverse=TRUE)`
+
+---
+class: inverse, middle, center
+background-image: url(assets/white_logo.png)
+
+# Automate whenever possible
+
+---
+
+layout: true
+`r add_border(inverse=FALSE)`
+
+---
+
+# The trouble with code is...
+
+--
+
+  * I don't trust myself to write good code 100% of the time
+
+--
+
+  * Solution: Check my commits!
+  
+---
+
+background-image: url(graphics/travis-op.png)
+ 
+# Travis CI
+
+> Travis CI is a hosted, distributed continuous integration service 
+> used to build and test software projects hosted at GitHub
+
+--
+
+You commit, travis checks you haven't done something silly
+
+  * [![Build Status](https://travis-ci.org/eRum2018-talk/erum2018.svg?branch=master)](https://travis-ci.org/eRum2018-talk/erum2018)
+
+---
+
+# .travis.yml
+
+```
+# Add this to your repo directory
+language: r
+cache: packages
+```
+--
+```
+r:
+  - release
+  - oldrel
+  - devel
+```
+--
+```
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+```
+--
+> You commit, travis checks if your package passess all tests
+
+---
+
+# Anything else?
+
+---
+
+# Code coverage from your test suite - covr
+
+> Enforce 
+
+```
+r_packages:
+  - covr
+```
+--
+```
+after_success:
+  - Rscript -e 'covr::codecov()'
+```
+
+---
+
+# Code Standards - lintr
+
+```
+r_packages:
+  - covr
+```
+--
+```
+after_success:
+  - Rscript -e 'lintr::lint_package()'
+```
+
+---
+
+# Automatically push packages to repos
+
+  - An R repository is just a collection of packages
+  
+    - Ordered in a specific way
+    
+    - It can hosted on a web-server, USB stick, or standard file system
+    
+  - If a package is in a repo, we can 
+    
+    - use `install.package()`
+    
+    - use `update.packages()`
+    
+---
+
+# The drat package
+    
+  - The __drat__ package makes it easy to create your own repository
+  
+    - Takes care of the file structure via `drat:::insert(.)`
+    
+  - GitHub makes it easy to host a web-site
+  
+    - Just create a branch called `gh-pages`
+--
+
+  - Big picture
+  
+    - Clone the repo
+    
+    - Run `drat:::insert("my_pkg_1.0.0.tar.gz")`
+    
+    - Push
+
+---
+
+# Now via travis CI
+
+```
+r_packages:
+  - drat
+
+# deploy.sh a shell script
+after_success:
+  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash deploy.sh
+```
+---
+
+# Don't like email - try PushBullet
+```
+after_success:
+  - Rscript -e 'RPushbullet::pbPost("note",
+                                    "A simple title",
+                                    "Hi",
+                                    apikey = Sys.getenv("PUSHBULLET"),
+                                    devices = list("ujBMyrjTBZYsjAiVsKnSTs", "ujBMyrjTBZYsjz7O3P0Jl6"))'
+```
+---
+
+# GitHub Integrations
+
+  - Link directly to twitter
+
+
+---
+
+# All the cool kids use Docker
+
+ - Straightforward to link GitHub with Dockerhub
+ 
+ - Commit triggers dockerhub to build an image
+
+[![](https://img.shields.io/docker/automated/csgillespie/erum2018.svg)](https://hub.docker.com/r/csgillespie/erum2018/builds/)
+
+---
+
+# appveyor
+
+  - Continuous Integration solution for Windows
+  
+    - Similar to travis
+    
+  - Commit triggers package builds on
+  
+    - R 3.3
+    - R 3.4
+    - R 3.5
+
+--
+
+  - drat then pushes the Windows binaries to our drat repo!
+
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/eRum2018-talk/erum2018?branch=master&svg=true)](https://ci.appveyor.com/project/eRum2018-talk/erum2018)
+---
+
+# 
+
+```{r echo=FALSE, out.width="100%"}
+knitr::include_graphics("erum2018.svg")
+```
+
+---
+
+# Use case: teaching
+
+We run multiple public & on-site R courses each month
+
+  - Course materials are distributed via packages
+  
+    - Everyone uses `install.packages()`
+  
+  - Docker image created for running RStudio in the cloud
+  
+---
+
+
+# Use case: R conferences and groups
+
+  * List of useR groups and conferences
+
+> https://github.com/jumpingrivers/meetingsR
+
+  * Pages hosted on GitHub
+  
+    - bookdown site
+  
+    - Anyone can propose a change via a Pull request
+    
+  * Following a master commit, travis
+  
+    - builds the bookdown html and pushes to a gh-pages branch
+    
+    - Parses the file to create a csv list of groups/conferences
+
+---
+
+# What else?
+
+  - A timing suite
+  
+    - Every commit launches a set of timing functions
+    
+    - Saves the results in an external file
+    
+  - Able assess how each new commit affects the speed of the package
+
+
+
+
+---
+
+# Acknowledgements
+
+  - drat, Rpushbullet - Dirk
+
+
+
+
+
+
+
+
+
+
+
+
