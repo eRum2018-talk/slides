@@ -1,6 +1,6 @@
 ---
 title: "GitHub and Friends"
-subtitle: ""
+subtitle: "AKA: How do I get badges on my repo"
 author: '`r jrPresentation::get_author()`'
 output:
   xaringan::moon_reader:
@@ -24,23 +24,25 @@ layout: true
 `r add_border(inverse=FALSE)`
 ---
 
-# Code
+# Material
 
-  * Slides: https://jumpingrivers.com/t/2018-erurm/
+  * HTML slides: https://jumpingrivers.com/t/2018-erum-github/
 
-  * Repo: https://github.com/erum2018-talk/
+  * GitHub organisation: https://github.com/erum2018-talk/
   
-    - Contains slides
+    - A dummy R package used in this talk (`erum2018/`)
     
-    - All the automation I'm about to talk about
+    - Markdown documents (`slides/`)
+    
+    - Drat repository (`drat/`)
+  
+  * This talk uses git and GitHub
+    
+  * Appropriate credits are the end
 
 ---
 
 # We all use packages (don't we?)
-
---
-
-  * Automatic code checks
 
 --
 
@@ -53,6 +55,14 @@ layout: true
 --
 
     - But it can't force us to write good documentation!
+
+--
+
+  * __Automatic code checking__
+  
+    - R CMD check my_amazing_pkg.tar.gz
+    
+    - R CMD check --as-cran my_amazing_pkg.tar.gz
 
 ---
 
@@ -78,9 +88,6 @@ It (allegedly) makes it easier to merge documents
 
 > Generally "a good thing"
 
---
-
-This talk uses git and GitHub
 
 ---
 
@@ -109,35 +116,37 @@ layout: true
 
 # The trouble with code is...
 
---
-
+.pull-left[
   * I don't trust myself to write good code 100% of the time
 
---
+  * Solution: Check my (pushed) commits!
+]
 
-  * Solution: Check my commits!
-  
+.pull-right[
+```{r, echo = FALSE, out.width="90%"}
+knitr::include_graphics("graphics/machine_learning_no_text.jpg")
+```
+]
+
 ---
 
 background-image: url(graphics/travis-op.png)
  
-# Travis CI
+# Travis CI [![Build Status](https://travis-ci.org/eRum2018-talk/erum2018.svg?branch=master)](https://travis-ci.org/eRum2018-talk/erum2018)
+
 
 > Travis CI is a hosted, distributed continuous integration service 
 > used to build and test software projects hosted at GitHub
 
 --
 
-You commit, travis checks you haven't done something silly
-
-  * [![Build Status](https://travis-ci.org/eRum2018-talk/erum2018.svg?branch=master)](https://travis-ci.org/eRum2018-talk/erum2018)
+You push, travis checks you haven't done something silly
 
 ---
 
-# .travis.yml
+# Add .travis.yml to your repo  [![Build Status](https://travis-ci.org/eRum2018-talk/erum2018.svg?branch=master)](https://travis-ci.org/eRum2018-talk/erum2018)
 
 ```
-# Add this to your repo directory
 language: r
 cache: packages
 ```
@@ -156,45 +165,89 @@ notifications:
     on_failure: change
 ```
 --
-> You commit, travis checks if your package passess all tests
+
+> Authorise at [travis-ci.org](https://travis-ci.org/)
 
 ---
+
+layout: true
+`r add_border(inverse=TRUE)`
+
+---
+
+class: inverse, middle, center
+background-image: url(assets/white_logo.png)
 
 # Anything else?
 
 ---
 
-# Code coverage from your test suite - covr
+layout: true
+`r add_border(inverse=FALSE)`
 
-> Enforce 
+---
+
+# Test suite code coverage [![codecov](https://codecov.io/gh/eRum2018-talk/erum2018/branch/master/graph/badge.svg)](https://codecov.io/gh/eRum2018-talk/erum2018)
+
+You can add unit tests to your package:
+
+  - specific inputs, give outputs
+  
+  - expected errors
+  
+  - fix a bug, add a test 
+
+--
 
 ```
+# .travis.yml
 r_packages:
   - covr
 ```
 --
 ```
 after_success:
-  - Rscript -e 'covr::codecov()'
+  - Rscript -e "covr::codecov()"
 ```
 
 ---
+# Test suite code coverage [![codecov](https://codecov.io/gh/eRum2018-talk/erum2018/branch/master/graph/badge.svg)](https://codecov.io/gh/eRum2018-talk/erum2018)
 
-# Code Standards - lintr
+You can add unit tests to your package:
+
+  - specific inputs, give outputs
+  
+  - expected errors
+  
+  - fix a bug, add a test 
 
 ```
+# .travis.yml
 r_packages:
   - covr
 ```
---
 ```
+after_success:
+  - Rscript -e "if(length(grep('1\$', ${TRAVIS_JOB_NUMBER}))) 
+                                                    covr::codecov()";
+  ```
+---
+
+# Coding standards 
+
+Do commits follow a style guide?
+
+```
+r_packages:
+  - lintr
+
 after_success:
   - Rscript -e 'lintr::lint_package()'
 ```
 
 ---
 
-# Automatically push packages to repos
+# Automatically push packages to a repo
 
   - An R repository is just a collection of packages
   
@@ -202,19 +255,19 @@ after_success:
     
     - It can hosted on a web-server, USB stick, or standard file system
     
-  - If a package is in a repo, we can 
+  - If a package is in a repo, we can use
     
-    - use `install.package()`
+    - `install.packages()`
     
-    - use `update.packages()`
-    
+    - `update.packages()`
+   
 ---
 
 # The drat package
     
   - The __drat__ package makes it easy to create your own repository
   
-    - Takes care of the file structure via `drat:::insert(.)`
+    - Takes care of the file structure via `drat::insertPackage("my_pkg")`
     
   - GitHub makes it easy to host a web-site
   
@@ -223,11 +276,11 @@ after_success:
 
   - Big picture
   
-    - Clone the repo
+    - Run `drat::insertPackage("my_pkg_1.0.0.tar.gz")` on travis
     
-    - Run `drat:::insert("my_pkg_1.0.0.tar.gz")`
+    - Push package to gh-pages
     
-    - Push
+    - Specify the repo URL and `install.packages()` now works
 
 ---
 
@@ -236,126 +289,151 @@ after_success:
 ```
 r_packages:
   - drat
+```
+--
 
+```
 # deploy.sh a shell script
 after_success:
-  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash deploy.sh
+  - test $TRAVIS_PULL_REQUEST == "false" && 
+    test $TRAVIS_BRANCH == "master" && 
+    bash deploy.sh
 ```
 ---
 
 # Don't like email - try PushBullet
 ```
+r_packages:
+  - RPushbullet
+
 after_success:
-  - Rscript -e 'RPushbullet::pbPost("note",
-                                    "A simple title",
-                                    "Hi",
-                                    apikey = Sys.getenv("PUSHBULLET"),
-                                    devices = list("ujBMyrjTBZYsjAiVsKnSTs", "ujBMyrjTBZYsjz7O3P0Jl6"))'
+  - Rscript -e 'RPushbullet::pbPost(
+                          "note",
+                          "If you think my accent is bad",
+                          "Search for 'Geordie' on Youtube",
+                          apikey = Sys.getenv("PUSHBULLET"),
+                          devices = list("XXX", "YYY"))'
 ```
+--
+
+  * Same idea applies to slack and friends
+  
+  * Alternatively, use a direct Github integration for twitter
+  
+    - Go to: Settings -> Integrations & services on GitHub
+
 ---
 
-# GitHub Integrations
-
-  - Link directly to twitter
-
-
----
-
-# All the cool kids use Docker
+# All the cool kids use Docker [![](https://img.shields.io/docker/automated/csgillespie/erum2018.svg)](https://hub.docker.com/r/csgillespie/erum2018/builds/)
 
  - Straightforward to link GitHub with Dockerhub
  
  - Commit triggers dockerhub to build an image
 
-[![](https://img.shields.io/docker/automated/csgillespie/erum2018.svg)](https://hub.docker.com/r/csgillespie/erum2018/builds/)
-
 ---
 
-# appveyor
+# appveyor [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/eRum2018-talk/erum2018?branch=master&svg=true)](https://ci.appveyor.com/project/eRum2018-talk/erum2018)
 
   - Continuous Integration solution for Windows
   
-    - Similar to travis
+    - travis for Windows
     
   - Commit triggers package builds on
   
-    - R 3.3
-    - R 3.4
-    - R 3.5
-
---
+    - R 3.3, R 3.4, R 3.5
 
   - drat then pushes the Windows binaries to our drat repo!
 
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/eRum2018-talk/erum2018?branch=master&svg=true)](https://ci.appveyor.com/project/eRum2018-talk/erum2018)
 ---
 
-# 
+layout: true
+`r add_border(inverse=TRUE)`
 
-```{r echo=FALSE, out.width="100%"}
-knitr::include_graphics("erum2018.svg")
-```
+---
+class: inverse, middle, center
+background-image: url(assets/white_logo.png)
+
+# Use cases?
 
 ---
 
-# Use case: teaching
+layout: true
+`r add_border(inverse=FALSE)`
 
-We run multiple public & on-site R courses each month
+---
+
+# Teaching
+
+We run courses almost every week
 
   - Course materials are distributed via packages
   
     - Everyone uses `install.packages()`
+    
+```{r,eval = FALSE}
+update.packages("erum2018")
+```
   
   - Docker image created for running RStudio in the cloud
+  
+    - [jumpingrivers.training](https://jumpingrivers.training)
   
 ---
 
 
-# Use case: R conferences and groups
+# R conferences and groups
 
   * List of useR groups and conferences
 
-> https://github.com/jumpingrivers/meetingsR
+> https://jumpingrivers.github.io/meetingsR/
+
+--
 
   * Pages hosted on GitHub
   
     - bookdown site
   
     - Anyone can propose a change via a Pull request
-    
-  * Following a master commit, travis
+
+--
+
+  * Following a master commit, 
   
-    - builds the bookdown html and pushes to a gh-pages branch
+    - travis, builds the bookdown html and pushes to a gh-pages branch
     
     - Parses the file to create a csv list of groups/conferences
-
----
-
-# What else?
-
-  - A timing suite
+    
+    - tweet the commit
   
-    - Every commit launches a set of timing functions
-    
-    - Saves the results in an external file
-    
-  - Able assess how each new commit affects the speed of the package
-
-
-
 
 ---
 
-# Acknowledgements
+# Thanks & Any Questions?
 
-  - drat, Rpushbullet - Dirk
+```{r echo=FALSE, out.width="84%"}
+knitr::include_graphics("graphics/erum2018.png")
+```
 
+See [jumpingrivers.com/dates](https://jumpingrivers.com/dates) for our
+upcoming courses (UK/Germany)
 
+```{r echo=FALSE, out.width="20%"}
+knitr::include_graphics("graphics/300_125.jpg")
+```
 
+---
 
+# References
 
+  - Creating repos with [drat](https://github.com/eddelbuettel/drat)
+  
+  - R interface to [pushbullet](https://github.com/eddelbuettel/rpushbullet)
 
+  - Static code analyse with [lintr](https://github.com/jimhester/lintr)
 
+  - Test coverage with [covr](https://github.com/r-lib/covr)
+
+  - [r-travis](https://github.com/craigcitro/r-travis)
 
 
 

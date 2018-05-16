@@ -239,3 +239,4 @@ TSWLatexianTemp*
 
 # standalone packages
 *.sta
+.Rproj.user
