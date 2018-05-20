@@ -38,7 +38,7 @@ layout: true
   
   * This talk uses git and GitHub
     
-  * Appropriate credits are the end
+  * Credits/links at the end
 
 ---
 
@@ -332,7 +332,7 @@ after_success:
 
 ---
 
-# appveyor [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/eRum2018-talk/erum2018?branch=master&svg=true)](https://ci.appveyor.com/project/eRum2018-talk/erum2018)
+# appveyor [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/eRum2018-talk/erum2018?branch=master&svg=true)](https://ci.appveyor.com/project/csgillespie/erum2018)
 
   - Continuous Integration solution for Windows
   
